@@ -7,14 +7,20 @@ from flask_talisman import Talisman
 
 load_dotenv()
 
-# 🔥 CONFIG DEPLOY
+# =========================
+# CONFIG DEPLOY
+# =========================
 PORT = int(os.environ.get("PORT", 5000))
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# IMPORT SOCKETIO
+# =========================
+# SOCKET (IMPORT DEPOIS CONFIG)
+# =========================
 from routes.websocket import socketio
 
+# =========================
 # ROUTES
+# =========================
 from routes.api_register import registrar
 from routes.api_auth import login_bp
 from routes.api_usuario import users_bp
@@ -30,7 +36,9 @@ from routes.api_todos_produtos import Todos_produtos
 from routes.api_me import login_bp as me_bp
 from routes.api_logout import login_bp as logout_bp
 
-# WEBSOCKETS IMPORTS (mantidos)
+# =========================
+# WEBSOCKETS IMPORTS
+# =========================
 import routes.websoket_conectUser
 import routes.websocket_aceitar_pedido_amizade
 import routes.websocket_recusar_pedido_amizade 
@@ -44,21 +52,28 @@ import routes.websocket_nova_quantidade_de_menssagem
 import routes.websocket_Eliminar_menssagem
 import routes.websocket_Editar_menssagem
 
+# =========================
 # APP
+# =========================
 app = Flask(__name__)
 
-# CORS (🔥 ADICIONADO NETLIFY)
+# =========================
+# CORS FIX (NETLIFY + LOCAL)
+# =========================
 CORS(app, resources={r"/*": {
     "origins": [
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
         "https://ancora-ecommerce.netlify.app"
     ],
+    "supports_credentials": True,
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
 }})
 
-# SECURITY HEADERS (🔥 FIX SOCKET CONNECT)
+# =========================
+# SECURITY HEADERS
+# =========================
 Talisman(
     app,
     content_security_policy={
@@ -66,9 +81,7 @@ Talisman(
         "connect-src": [
             "'self'",
             "https://ancora-ecommerce.netlify.app",
-            "wss://ancora-ecommerce.netlify.app",
-            "ws://ancora-ecommerce.netlify.app",
-            "https://ancora-ecommerce.netlify.app"
+            "wss://ancora-ecommerce.netlify.app"
         ],
         "img-src": ["'self'", "data:", "blob:"]
     },
@@ -76,7 +89,9 @@ Talisman(
     strict_transport_security=False
 )
 
-# DB CONFIG
+# =========================
+# DATABASE
+# =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -87,15 +102,29 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db.init_app(app)
 
-# SOCKET INIT (🔥 IMPORTANTE: SEM threading)
-socketio.init_app(app, cors_allowed_origins="*")
+# =========================
+# SOCKET INIT (🔥 FIX FINAL)
+# =========================
+socketio.init_app(
+    app,
+    cors_allowed_origins=[
+        "https://ancora-ecommerce.netlify.app",
+        "http://localhost:5173"
+    ],
+    async_mode="threading"
+)
 
+# =========================
+# DB INIT
+# =========================
 def setup_database():
     with app.app_context():
         db.create_all()
         print("✅ Tabelas criadas com sucesso")
 
+# =========================
 # BLUEPRINTS
+# =========================
 app.register_blueprint(registrar)
 app.register_blueprint(users_bp)
 app.register_blueprint(date_perfil_user)
@@ -109,7 +138,9 @@ app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
 
+# =========================
 # MAIN
+# =========================
 if __name__ == '__main__':
     setup_database()
 
