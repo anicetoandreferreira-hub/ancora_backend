@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 login_bp = Blueprint("login", __name__)
 
-FRONTEND_URL = "https://ancora-oficial-ao.netlify.app"
+FRONTEND_URL = "https://ancora-ecommerce.netlify.app/"
 
 
 # =========================
