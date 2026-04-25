@@ -1,34 +1,20 @@
-# ===============================
-# 🔥 IMPORTANTE: EVENTLET PRIMEIRO
-# ===============================
-import eventlet
-eventlet.monkey_patch()
-
 from dotenv import load_dotenv
 import os
-
 from flask import Flask
 from flask_cors import CORS
-from flask_talisman import Talisman
-
 from models.database import db
+from flask_talisman import Talisman
 
 load_dotenv()
 
-# ===============================
-# 🔥 CONFIGURAÇÃO
-# ===============================
+# 🔥 CONFIG DEPLOY
 PORT = int(os.environ.get("PORT", 5000))
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# ===============================
-# SOCKETIO
-# ===============================
+# IMPORT SOCKETIO
 from routes.websocket import socketio
 
-# ===============================
-# IMPORTS API
-# ===============================
+# ROUTES
 from routes.api_register import registrar
 from routes.api_auth import login_bp
 from routes.api_usuario import users_bp
@@ -44,12 +30,10 @@ from routes.api_todos_produtos import Todos_produtos
 from routes.api_me import login_bp as me_bp
 from routes.api_logout import login_bp as logout_bp
 
-# ===============================
-# IMPORTS WEBSOCKET
-# ===============================
+# WEBSOCKETS IMPORTS (mantidos)
 import routes.websoket_conectUser
 import routes.websocket_aceitar_pedido_amizade
-import routes.websocket_recusar_pedido_amizade
+import routes.websocket_recusar_pedido_amizade 
 import routes.websocket_entrar_na_sala
 import routes.websocket_enviar_menssagem
 import routes.websocket_usuario_digitando
@@ -60,45 +44,40 @@ import routes.websocket_nova_quantidade_de_menssagem
 import routes.websocket_Eliminar_menssagem
 import routes.websocket_Editar_menssagem
 
-# ===============================
 # APP
-# ===============================
 app = Flask(__name__)
 
-# ===============================
-# CORS (PRODUÇÃO + LOCAL)
-# ===============================
+# CORS (🔥 ADICIONADO NETLIFY)
 CORS(app, resources={r"/*": {
     "origins": [
-        "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "ancora-ecommerce.netlify.app"
+        "http://localhost:5173",
+        "https://ancora-ecommerce.netlify.app"
     ],
     "supports_credentials": True,
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
 }})
 
-# ===============================
-# SEGURANÇA (CSP CORRIGIDO)
-# ===============================
-Talisman(app,
+# SECURITY HEADERS (🔥 FIX SOCKET CONNECT)
+Talisman(
+    app,
     content_security_policy={
-        'default-src': "'self'",
-        'connect-src': [
+        "default-src": "'self'",
+        "connect-src": [
             "'self'",
-            "https://ancora-backend-4.onrender.com",
-            "wss://ancora-backend-4.onrender.com"
+            "https://ancora-ecommerce.netlify.app",
+            "wss://ancora-ecommerce.netlify.app",
+            "ws://ancora-ecommerce.netlify.app",
+            "https://ancora-ecommerce.netlify.app"
         ],
-        'img-src': ["'self'", "data:", "blob:"]
+        "img-src": ["'self'", "data:", "blob:"]
     },
     force_https=False,
     strict_transport_security=False
 )
 
-# ===============================
-# CONFIG DB
-# ===============================
+# DB CONFIG
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -109,22 +88,15 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db.init_app(app)
 
-# ===============================
-# SOCKET INIT
-# ===============================
+# SOCKET INIT (🔥 IMPORTANTE: SEM threading)
 socketio.init_app(app, cors_allowed_origins="*")
 
-# ===============================
-# DATABASE
-# ===============================
 def setup_database():
     with app.app_context():
         db.create_all()
-        print("✅ Database OK")
+        print("✅ Tabelas criadas com sucesso")
 
-# ===============================
 # BLUEPRINTS
-# ===============================
 app.register_blueprint(registrar)
 app.register_blueprint(users_bp)
 app.register_blueprint(date_perfil_user)
@@ -138,17 +110,19 @@ app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
 
-# ===============================
-# START SERVER
-# ===============================
-if __name__ == "__main__":
+# MAIN
+if __name__ == '__main__':
     setup_database()
 
-    print("🚀 Backend Âncora a iniciar...")
+    print("=" * 70)
+    print("🚀 SERVIDOR SOCKET + FLASK ONLINE")
+    print(f"🌍 Porta: {PORT}")
+    print("=" * 70)
 
     socketio.run(
         app,
         host="0.0.0.0",
         port=PORT,
-        debug=DEBUG
+        debug=DEBUG,
+        allow_unsafe_werkzeug=True
     )
