@@ -1,12 +1,12 @@
 # app.py
 import eventlet
+eventlet.monkey_patch()
 from dotenv import load_dotenv
 import os
 from flask import Flask
 from flask_cors import CORS
 from models.database import db
 from flask_talisman import Talisman
-eventlet.monkey_patch()
 load_dotenv()
 
 # 🔥 ADICIONADO (lógica de deploy)
