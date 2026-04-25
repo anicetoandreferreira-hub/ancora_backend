@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 
 login_bp = Blueprint("login", __name__)
 
+# ===========================
+# 🔐 LOGIN
+# ===========================
 @login_bp.route("/Login", methods=["POST"])
 def Login():
     try:
@@ -62,25 +65,27 @@ def Login():
             "telefone": usuario["telefone"]
         }))
 
-        # 🔥 COOKIE PRINCIPAL
+        # ===========================
+        # 🍪 COOKIE FIX (CRÍTICO PARA NETLIFY + RENDER + SOCKET)
+        # ===========================
+
         resp.set_cookie(
             "token_sessao",
             value=access_token,
             max_age=60 * 15,
             httponly=True,
-            secure=True,        # 🔥 Render HTTPS
-            samesite="None",    # 🔥 CROSS DOMAIN FIX
+            secure=True,        # HTTPS obrigatório no Render
+            samesite="None",    # 🔥 ESSENCIAL para cross-domain
             path="/"
         )
 
-        # 🔥 REFRESH COOKIE
         resp.set_cookie(
             "refresh_token",
             value=refresh_token,
             max_age=60 * 60 * 24 * 7,
             httponly=True,
-            secure=True,        # 🔥 IMPORTANTE
-            samesite="None",    # 🔥 IMPORTANTE
+            secure=True,
+            samesite="None",    # 🔥 ESSENCIAL
             path="/"
         )
 
@@ -97,12 +102,12 @@ def Login():
 # ===========================
 # 🔄 REFRESH TOKEN
 # ===========================
-
 @login_bp.route("/refresh", methods=["POST"])
 def refresh():
     refresh_token = request.cookies.get('refresh_token')
 
     if not refresh_token:
+        print("❌ Sem refresh token recebido")
         return jsonify({"erro": "Sem refresh token"}), 401
 
     try:
@@ -115,6 +120,7 @@ def refresh():
         if payload.get("type") != "refresh":
             return jsonify({"erro": "Token inválido"}), 401
 
+        # 🔥 NOVO ACCESS TOKEN
         novo_access = jwt.encode({
             "id": payload["id"],
             "nome": payload["nome"],
@@ -125,6 +131,9 @@ def refresh():
 
         resp = jsonify({"mensagem": "Token renovado"})
 
+        # ===========================
+        # 🍪 REFRESH DO COOKIE
+        # ===========================
         resp.set_cookie(
             "token_sessao",
             novo_access,
@@ -138,6 +147,7 @@ def refresh():
         return resp, 200
 
     except jwt.ExpiredSignatureError:
+        print("❌ Refresh expirado")
         return jsonify({"erro": "Refresh expirado"}), 401
 
     except Exception as e:
