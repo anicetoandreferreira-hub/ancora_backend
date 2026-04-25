@@ -8,6 +8,10 @@ login_bp = Blueprint("login", __name__)
 
 FRONTEND_URL = "https://ancora-oficial-ao.netlify.app"
 
+
+# =========================
+# 🔐 LOGIN
+# =========================
 @login_bp.route("/Login", methods=["POST"])
 def Login():
     try:
@@ -26,9 +30,7 @@ def Login():
         usuario = resultado["usuario"]
         user_id = usuario["id"]
 
-        # =========================
         # ACCESS TOKEN
-        # =========================
         access_payload = {
             "id": user_id,
             "nome": usuario["nome"],
@@ -43,9 +45,7 @@ def Login():
             algorithm="HS256"
         )
 
-        # =========================
         # REFRESH TOKEN
-        # =========================
         refresh_payload = {
             "id": user_id,
             "nome": usuario["nome"],
@@ -68,29 +68,25 @@ def Login():
             "telefone": usuario["telefone"]
         }))
 
-        # =========================
-        # 🔥 COOKIE ACCESS (FIXED)
-        # =========================
+        # COOKIE ACCESS
         resp.set_cookie(
             "token_sessao",
             access_token,
             max_age=60 * 15,
             httponly=True,
-            secure=True,        # obrigatório em HTTPS (Render)
-            samesite="None",    # 🔥 CRÍTICO para Netlify ↔ Render
+            secure=True,
+            samesite="None",
             path="/"
         )
 
-        # =========================
-        # 🔥 COOKIE REFRESH (FIXED)
-        # =========================
+        # COOKIE REFRESH
         resp.set_cookie(
             "refresh_token",
             refresh_token,
             max_age=60 * 60 * 24 * 7,
             httponly=True,
-            secure=True,        # 🔥 TEM QUE SER TRUE também
-            samesite="None",    # 🔥 CRÍTICO
+            secure=True,
+            samesite="None",
             path="/"
         )
 
@@ -102,3 +98,53 @@ def Login():
             "status": "False",
             "menssagem": "Erro interno"
         }), 500
+
+
+# =========================
+# 🔄 REFRESH TOKEN (MESMO BLUEPRINT)
+# =========================
+@login_bp.route("/refresh", methods=["POST"])
+def refresh():
+    try:
+        refresh_token = request.cookies.get("refresh_token")
+
+        if not refresh_token:
+            return jsonify({"erro": "Sem refresh token"}), 401
+
+        payload = jwt.decode(
+            refresh_token,
+            os.getenv("SECRET_KEY"),
+            algorithms=["HS256"]
+        )
+
+        if payload.get("type") != "refresh":
+            return jsonify({"erro": "Token inválido"}), 401
+
+        novo_access = jwt.encode({
+            "id": payload["id"],
+            "nome": payload["nome"],
+            "telefone": payload["telefone"],
+            "type": "access",
+            "exp": datetime.utcnow() + timedelta(minutes=15)
+        }, os.getenv("SECRET_KEY"), algorithm="HS256")
+
+        resp = jsonify({"mensagem": "Token renovado"})
+
+        resp.set_cookie(
+            "token_sessao",
+            novo_access,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            max_age=15 * 60,
+            path="/"
+        )
+
+        return resp, 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"erro": "Refresh expirado"}), 401
+
+    except Exception as e:
+        print(f"Erro refresh: {e}")
+        return jsonify({"erro": "Token inválido"}), 401
