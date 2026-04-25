@@ -51,10 +51,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {
     "origins": [
         "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5173"
         "https://ancora-ecommerce.netlify.app"
     ],
-    "supports_credentials": True,
+    "supports_credentials"=True,
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
 }})
