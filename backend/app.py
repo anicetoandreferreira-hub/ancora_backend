@@ -84,7 +84,7 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 db.init_app(app)
 
 # REMOVIDO allow_unsafe_werkzeug daqui
-socketio.init_app(app)
+socketio.init_app(app, cors_allowed_origins="*")
 
 def setup_database():
     with app.app_context():
