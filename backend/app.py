@@ -111,7 +111,7 @@ socketio.init_app(
         "https://ancora-ecommerce.netlify.app",
         "http://localhost:5173"
     ],
-    async_mode="threading"
+    async_mode="threading"  # 🔥 ESTÁVEL NO RENDER
 )
 
 # =========================
