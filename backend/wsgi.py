@@ -1,9 +1,10 @@
-# wsgi.py   ← Este é o mais importante
+# wsgi.py
 import eventlet
-eventlet.monkey_patch()   # ← Tem que ser a PRIMEIRA coisa a ser executada
+eventlet.monkey_patch()   # ← Obrigatório ser a primeira linha
 
-from app import app, socketio
+from app import app       # Importamos apenas o 'app' (Flask)
 
-# Para rodar localmente (opcional)
 if __name__ == "__main__":
+    # Apenas para testes locais
+    from app import socketio
     socketio.run(app, host="0.0.0.0", port=5000, debug=False)
