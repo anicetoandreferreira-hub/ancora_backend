@@ -148,19 +148,20 @@ def setup_database():
 # =========================
 # RUN (para Render usar Gunicorn)
 # =========================
-if __name__ == '__main__':
-    setup_database()
-    print("=" * 70)
-    print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
-    print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
-    print(f"🌐 Frontend: {FRONTEND_URL}")
-    print("=" * 70)
+# if __name__ == '__main__':
+ #   setup_database()
+  #  print("=" * 70)
+  #  print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
+  #  print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
+  #  print(f"🌐 Frontend: {FRONTEND_URL}")
+  #  print("=" * 70)
 
     # Apenas para rodar localmente
-    socketio.run(
-        app,
-        host="0.0.0.0",
-        port=PORT,
-        debug=DEBUG,
-        allow_unsafe_werkzeug=DEBUG
-    )
+ #   socketio.run(
+    #    app,
+     #   host="0.0.0.0",
+     #   port=PORT,
+     #   debug=DEBUG,
+      #  allow_unsafe_werkzeug=DEBUG
+ #   )
+    
