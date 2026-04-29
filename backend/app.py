@@ -136,27 +136,31 @@ app.register_blueprint(me_bp)
 # =========================
 # DATABASE SETUP
 # =========================
+# =========================
+# DATABASE SETUP
+# =========================
 def setup_database():
     with app.app_context():
         db.create_all()
         print("✅ Tabelas criadas com sucesso")
 
+
 # =========================
-# MAIN
+# RUN (para Render usar Gunicorn)
 # =========================
 if __name__ == '__main__':
     setup_database()
-
     print("=" * 70)
-    print("🚀 SERVIDOR SOCKET + FLASK ONLINE")
+    print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
     print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
-    print(f"🌐 Frontend permitido: {FRONTEND_URL}")
+    print(f"🌐 Frontend: {FRONTEND_URL}")
     print("=" * 70)
 
+    # Apenas para rodar localmente
     socketio.run(
         app,
         host="0.0.0.0",
         port=PORT,
         debug=DEBUG,
-        allow_unsafe_werkzeug=DEBUG   # Só True quando DEBUG=True
+        allow_unsafe_werkzeug=DEBUG
     )
