@@ -13,7 +13,7 @@ load_dotenv()
 PORT = int(os.environ.get("PORT", 5000))
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-# URL do frontend (Netlify) - Recomendado usar variável de ambiente
+# URL do frontend (Netlify)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ancora-ecommerce.netlify.app")
 
 # =========================
@@ -22,7 +22,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ancora-ecommerce.netlify.app")
 app = Flask(__name__)
 
 # =========================
-# CORS (Único e bem configurado)
+# CORS
 # =========================
 CORS(app, resources={r"/*": {
     "origins": [
@@ -36,7 +36,7 @@ CORS(app, resources={r"/*": {
 }})
 
 # =========================
-# TALISMAN (CSP corrigido para WebSocket)
+# TALISMAN (CSP)
 # =========================
 Talisman(
     app,
@@ -45,11 +45,11 @@ Talisman(
         "connect-src": [
             "'self'",
             FRONTEND_URL,
-            "https://*.onrender.com",   # Backend no Render
-            "wss://*.onrender.com",     # WebSocket essencial
+            "https://*.onrender.com",
+            "wss://*.onrender.com",
             "ws://*.onrender.com"
         ],
-        "img-src": ["'self'", "data:", "blob:"],
+        "img-src": ["'self'", "data:", "blob:", "https://*.onrender.com"],
         "script-src": ["'self'", "'unsafe-inline'"],
     },
     force_https=True,
@@ -57,14 +57,20 @@ Talisman(
 )
 
 # =========================
-# CONFIGURAÇÕES DA APLICAÇÃO
+# CONFIGURAÇÕES DA APLICAÇÃO + UPLOAD FOLDER (PRODUÇÃO)
 # =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'files')
 app.config['MAX_CONTENT_LENGTH'] = 2048 * 1024 * 1024   # 2GB
 
+# ==================== CONFIGURAÇÃO INTELIGENTE DO UPLOAD FOLDER ====================
+if os.getenv("RENDER") or os.getenv("PORT"):   # Detecta ambiente de produção no Render
+    app.config['UPLOAD_FOLDER'] = "/opt/render/project/src/static/files"
+else:
+    app.config['UPLOAD_FOLDER'] = os.path.join("static", "files")
+
+# Cria a pasta se não existir
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db.init_app(app)
@@ -77,7 +83,7 @@ from routes.websocket import socketio
 socketio.init_app(
     app,
     cors_allowed_origins=[FRONTEND_URL, "http://localhost:5173"],
-    async_mode="eventlet",           # Melhor opção para Render
+    async_mode="eventlet",
     logger=True,
     engineio_logger=True,
     ping_timeout=60,
@@ -102,7 +108,7 @@ from routes.api_todos_produtos import Todos_produtos
 from routes.api_me import login_bp as me_bp
 from routes.api_logout import login_bp as logout_bp
 
-# Imports dos WebSockets (mantém como tinhas)
+# Imports dos WebSockets
 import routes.websoket_conectUser
 import routes.websocket_aceitar_pedido_amizade
 import routes.websocket_recusar_pedido_amizade 
@@ -131,11 +137,8 @@ app.register_blueprint(buscar_produto_Usuario)
 app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
-# app.register_blueprint(logout_bp)   # descomenta se estiveres a usar
+# app.register_blueprint(logout_bp)   # descomenta quando necessário
 
-# =========================
-# DATABASE SETUP
-# =========================
 # =========================
 # DATABASE SETUP
 # =========================
@@ -146,22 +149,21 @@ def setup_database():
 
 
 # =========================
-# RUN (para Render usar Gunicorn)
+# RUN - COMENTADO (usando Gunicorn no Render)
 # =========================
 # if __name__ == '__main__':
- #   setup_database()
-  #  print("=" * 70)
-  #  print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
-  #  print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
-  #  print(f"🌐 Frontend: {FRONTEND_URL}")
-  #  print("=" * 70)
+#     setup_database()
+#     print("=" * 70)
+#     print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
+#     print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
+#     print(f"🌐 Frontend: {FRONTEND_URL}")
+#     print(f"📁 Upload Folder: {app.config['UPLOAD_FOLDER']}")
+#     print("=" * 70)
 
-    # Apenas para rodar localmente
- #   socketio.run(
-    #    app,
-     #   host="0.0.0.0",
-     #   port=PORT,
-     #   debug=DEBUG,
-      #  allow_unsafe_werkzeug=DEBUG
- #   )
-    
+#     socketio.run(
+#         app,
+#         host="0.0.0.0",
+#         port=PORT,
+#         debug=DEBUG,
+#         allow_unsafe_werkzeug=DEBUG
+#     )
