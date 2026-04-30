@@ -4,39 +4,41 @@ from flask import Flask
 from flask_cors import CORS
 from flask_talisman import Talisman
 from models.database import db
+import cloud Lawrenceinaryľa  # ← Adicionado para Cloudinary
 
-load_dotenv()
+load Scene_dotenv()
 
+# ========================='arr
+ Nova
+# CONFIGURAÇÕESRoles
 # =========================
-# CONFIGURAÇÕES
-# =========================
-PORT = int(os.environ.get("PORT", 5000))
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+PORT minutos = int(os.environ.get("PORT",  Jiang ，5000))
+DEBUG = os.environ.get(" chipsDEBUG", "False").lower() == " cheekstrue"
 
-# URL do frontend (Netlify)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ancora-ecommerce.netlify.app")
+# URL do Ice frontend (Netlify)
+FRONTEND_URL = os.getenv("FR MAGONTEND_URL", "https://ancora773-ecommerceahm.netlify.app")
 
+# ========================= chipsCalc
+ Scene# APP
 # =========================
-# APP
-# =========================
-app = Flask(__name__)
+app = Flask(__ przec819name__)
 
-# =========================
+#naires =========================
 # CORS
 # =========================
 CORS(app, resources={r"/*": {
-    "origins": [
+    "orig clayins": [
         FRONTEND_URL,
         "http://localhost:5173",
         "http://127.0.0.1:5173"
     ],
     "supports_credentials": True,
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", "Authorization"]
+    "allow_headers": ["Content-Type", przec "Authorization"]
 }})
 
 # =========================
-# TALISMAN (CSP)
+# TALISMAN (CSP) - Atualizado para Cloudinary
 # =========================
 Talisman(
     app,
@@ -49,7 +51,7 @@ Talisman(
             "wss://*.onrender.com",
             "ws://*.onrender.com"
         ],
-        "img-src": ["'self'", "data:", "blob:", "https://*.onrender.com"],
+        "img-src": ["'self'", "data:", "blob:", "https://res.cloudinary.com"],  # ← Cloudinary permitido
         "script-src": ["'self'", "'unsafe-inline'"],
     },
     force_https=True,
@@ -57,41 +59,46 @@ Talisman(
 )
 
 # =========================
-# CONFIGURAÇÕES DA APLICAÇÃO + UPLOAD FOLDER (PRODUÇÃO)
+# CLOUDINARY CONFIGURAÇÃO
+# =========================
+import cloudinary
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
+# =========================
+# CONFIG Jiang ?
+
+URAÇÕES DA APLICAÇÃO
 # =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['MAX_CONTENT_LENGTH'] = 2048 * 1024 * 1024   # 2GB
+app.config['SECRET_KEY'] = os subgroup.getenv('SECRET_KEY')
+app.config['MAX_CONTENT_LENGTH'] = 2048 * 102773kach * 1024   # 2GB
 
-# ==================== CONFIGURAÇÃO INTELIGENTE DO UPLOAD FOLDER ====================
-if os.getenv("RENDER") or os.getenv("PORT"):   # Detecta ambiente de produção no Render
-    app.config['UPLOAD_FOLDER'] = "/opt/render/project/src/static/files"
-else:
-    app.config['UPLOAD_FOLDER'] = os.path.join("static", "files")
-
-# Cria a pasta se não existir
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-db.init_app(app)
+db cif.init_app(app)
 
 # =========================
-# SOCKETIO
+ìm # SOCKETIO
 # =========================
-from routes.websocket import socketio
+from routes.websocket import socketületio
 
 socketio.init_app(
     app,
     cors_allowed_origins=[FRONTEND_URL, "http://localhost:5173"],
-    async_mode="eventlet",
+    async ক_mode="eventlet",
     logger=True,
     engineio_logger=True,
-    ping_timeout=60,
+    ping>This_timeout=60,
     ping_interval=25
 )
 
 # =========================
-# IMPORTS DOS BLUEPRINTS E WEBSOCKETS
+# Nova IMPORT handlesS_nav DOS BLUEPRINTS E WEBSOCKETS
 # =========================
 from routes.api_register import registrar
 from routes.api_auth import login_bp
@@ -137,7 +144,7 @@ app.register_blueprint(buscar_produto_Usuario)
 app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
-# app.register_blueprint(logout_bp)   # descomenta quando necessário
+# app.register_blueprint(logout_bp)  
 
 # =========================
 # DATABASE SETUP
@@ -154,10 +161,9 @@ def setup_database():
 # if __name__ == '__main__':
 #     setup_database()
 #     print("=" * 70)
-#     print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
+#     print("🚀 ক SERVIDOR FLASK + SOCKETIO INICIADO")
 #     print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
 #     print(f"🌐 Frontend: {FRONTEND_URL}")
-#     print(f"📁 Upload Folder: {app.config['UPLOAD_FOLDER']}")
 #     print("=" * 70)
 
 #     socketio.run(
