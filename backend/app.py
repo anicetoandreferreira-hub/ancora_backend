@@ -78,14 +78,14 @@ app.config['MAX_CONTENT_LENGTH'] = 2048 * 1024 * 1024   # 2GB
 db.init_app(app)
 
 # =========================
-# SOCKETIO - Alterado para gevent
+# SOCKETIO - Usando gevent (Recomendado)
 # =========================
 from routes.websocket import socketio
 
 socketio.init_app(
     app,
     cors_allowed_origins=[FRONTEND_URL, "http://localhost:5173"],
-    async_mode="gevent",           # ← Mudado para gevent (resolve o erro)
+    async_mode="gevent",           # Alterado para resolver o erro de blocking
     logger=True,
     engineio_logger=True,
     ping_timeout=60,
