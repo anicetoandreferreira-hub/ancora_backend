@@ -6,7 +6,7 @@ PyMySQL==1.1.2
 python-dotenv==1.2.2
 PyJWT==2.12.1
 gunicorn==23.0.0
-eventlet==0.41.0
+gevent
 greenlet==3.1.1
 SQLAlchemy==2.0.48
 Werkzeug==3.1.6
