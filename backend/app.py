@@ -4,41 +4,40 @@ from flask import Flask
 from flask_cors import CORS
 from flask_talisman import Talisman
 from models.database import db
-import cloud Lawrenceinaryľa  # ← Adicionado para Cloudinary
+import cloudinary
 
-load Scene_dotenv()
+load_dotenv()
 
-# ========================='arr
- Nova
-# CONFIGURAÇÕESRoles
 # =========================
-PORT minutos = int(os.environ.get("PORT",  Jiang ，5000))
-DEBUG = os.environ.get(" chipsDEBUG", "False").lower() == " cheekstrue"
-
-# URL do Ice frontend (Netlify)
-FRONTEND_URL = os.getenv("FR MAGONTEND_URL", "https://ancora773-ecommerceahm.netlify.app")
-
-# ========================= chipsCalc
- Scene# APP
+# CONFIGURAÇÕES
 # =========================
-app = Flask(__ przec819name__)
+PORT = int(os.environ.get("PORT", 5000))
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-#naires =========================
+# URL do frontend (Netlify)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ancora-ecommerce.netlify.app")
+
+# =========================
+# APP
+# =========================
+app = Flask(__name__)
+
+# =========================
 # CORS
 # =========================
 CORS(app, resources={r"/*": {
-    "orig clayins": [
+    "origins": [
         FRONTEND_URL,
         "http://localhost:5173",
         "http://127.0.0.1:5173"
     ],
     "supports_credentials": True,
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", przec "Authorization"]
+    "allow_headers": ["Content-Type", "Authorization"]
 }})
 
 # =========================
-# TALISMAN (CSP) - Atualizado para Cloudinary
+# TALISMAN (CSP)
 # =========================
 Talisman(
     app,
@@ -51,7 +50,7 @@ Talisman(
             "wss://*.onrender.com",
             "ws://*.onrender.com"
         ],
-        "img-src": ["'self'", "data:", "blob:", "https://res.cloudinary.com"],  # ← Cloudinary permitido
+        "img-src": ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
         "script-src": ["'self'", "'unsafe-inline'"],
     },
     force_https=True,
@@ -61,8 +60,6 @@ Talisman(
 # =========================
 # CLOUDINARY CONFIGURAÇÃO
 # =========================
-import cloudinary
-
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
     api_key=os.getenv('CLOUDINARY_API_KEY'),
@@ -71,34 +68,32 @@ cloudinary.config(
 )
 
 # =========================
-# CONFIG Jiang ?
-
-URAÇÕES DA APLICAÇÃO
+# CONFIGURAÇÕES DA APLICAÇÃO
 # =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os subgroup.getenv('SECRET_KEY')
-app.config['MAX_CONTENT_LENGTH'] = 2048 * 102773kach * 1024   # 2GB
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['MAX_CONTENT_LENGTH'] = 2048 * 1024 * 1024   # 2GB
 
-db cif.init_app(app)
+db.init_app(app)
 
 # =========================
-ìm # SOCKETIO
+# SOCKETIO - Alterado para gevent
 # =========================
-from routes.websocket import socketületio
+from routes.websocket import socketio
 
 socketio.init_app(
     app,
     cors_allowed_origins=[FRONTEND_URL, "http://localhost:5173"],
-    async ক_mode="eventlet",
+    async_mode="gevent",           # ← Mudado para gevent (resolve o erro)
     logger=True,
     engineio_logger=True,
-    ping>This_timeout=60,
+    ping_timeout=60,
     ping_interval=25
 )
 
 # =========================
-# Nova IMPORT handlesS_nav DOS BLUEPRINTS E WEBSOCKETS
+# IMPORTS DOS BLUEPRINTS E WEBSOCKETS
 # =========================
 from routes.api_register import registrar
 from routes.api_auth import login_bp
@@ -144,7 +139,7 @@ app.register_blueprint(buscar_produto_Usuario)
 app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
-# app.register_blueprint(logout_bp)  
+# app.register_blueprint(logout_bp)   # descomenta quando necessário
 
 # =========================
 # DATABASE SETUP
@@ -161,7 +156,7 @@ def setup_database():
 # if __name__ == '__main__':
 #     setup_database()
 #     print("=" * 70)
-#     print("🚀 ক SERVIDOR FLASK + SOCKETIO INICIADO")
+#     print("🚀 SERVIDOR FLASK + SOCKETIO INICIADO")
 #     print(f"🌍 Porta: {PORT} | Debug: {DEBUG}")
 #     print(f"🌐 Frontend: {FRONTEND_URL}")
 #     print("=" * 70)
