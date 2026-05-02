@@ -109,7 +109,7 @@ from routes.api_upload_file import upload_bp
 from routes.api_todos_produtos import Todos_produtos
 from routes.api_me import login_bp as me_bp
 from routes.api_logout import login_bp as logout_bp
-
+from routes.api_ping import ping
 # Imports dos WebSockets
 import routes.websoket_conectUser
 import routes.websocket_aceitar_pedido_amizade
@@ -139,6 +139,7 @@ app.register_blueprint(buscar_produto_Usuario)
 app.register_blueprint(upload_bp)
 app.register_blueprint(Todos_produtos)
 app.register_blueprint(me_bp)
+app.register_blueprint(ping)
 # app.register_blueprint(logout_bp)   # descomenta quando necessário
 
 # =========================
